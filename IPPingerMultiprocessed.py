@@ -1,4 +1,20 @@
-from threading import Thread
+'''This program creates multiple processes which carry out ping tests on all the ip addresses within a .csv file.'''
+# +========================================================================================================+
+# |Created  |   20 June 2019    |   Author  |   PhillipG6                                                  |
+# |========================================================================================================|
+# |Edits                |   Date        | Editor                                                           |
+# |--------------------------------------------------------------------------------------------------------|
+# |Changed Except clause| 20 June 2019  | PhillipG9                                                        |
+# |--------------------------------------------------------------------------------------------------------|
+# |Added timestamp      | 21 June 2019  | PhillipG9                                                        |
+# |--------------------------------------------------------------------------------------------------------|
+# |Changed from os.system to subprocess.call | 21 June 2019  | PhillipG9                                   |
+# |--------------------------------------------------------------------------------------------------------|
+# |Changed from os.system to subprocess.call | 21 June 2019  | PhillipG9                                   |
+# +========================================================================================================+
+
+
+from multiprocessing import Process
 import time
 import mysql.connector
 from datetime import datetime
@@ -18,6 +34,7 @@ def ping_ips(ip):
         date_time_objct = datetime.fromtimestamp(timestamp)
         date_time_objct = date_time_objct.strftime("%d %b %Y %H:%M:%S.%f")[:-1]
         if ping_ip == 1:
+            # print(f"Cannot connect to {ip} DateStamp =", date_time_objct)
             return_timestamp = date_time_objct
             return_status = "Down"
             ac = 0
@@ -28,6 +45,7 @@ def ping_ips(ip):
             cursor.close()
             conn.close()
         else:
+            # print(f"Can connect to {ip} DateStamp =", date_time_objct)
             return_timestamp = date_time_objct
             return_status = "Up"
             ac = 0
@@ -45,7 +63,7 @@ def ping_ips(ip):
 if __name__ == "__main__":
     while True:
         list_of_ips = []
-        list_of_threads = []  # Values created in each thread are stored here
+        list_of_processes = []  # Values created in each process are stored here
         open_csv = open('StoredIPs.csv', 'r')
         csv_reader = csv.reader(open_csv, delimiter=',')  # Reads the values from the csv file
         for row in csv_reader:
@@ -53,12 +71,12 @@ if __name__ == "__main__":
         open_csv.close()
         start = time.time()
         for ip in list_of_ips:
-            threads = Thread(target=ping_ips, args=(ip, ))  # This creates the threads
-            list_of_threads.append(threads)  # Appends the thread values to the list_of_threads list
-            threads.start()  # This initialises the threads
+            process = Process(target=ping_ips, args=(ip, ))  # This creates the processes
+            list_of_processes.append(process)  # Appends the process values to the list_of_processes list
+            process.start()  # This initialises the processes
 
-        for item in list_of_threads:
-            item.join()  # Stops the program from continuing past this point till all the threads have finished
+        for item in list_of_processes:
+            item.join()  # Stops the program from continuing past this point till all the processes have finished
 
         end = time.time()
         time_taken = end - start
@@ -66,3 +84,6 @@ if __name__ == "__main__":
         # took to finish running
         list_of_ips.clear()
         time.sleep(10)
+
+
+
